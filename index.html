@@ -6,39 +6,12 @@
   <title>🎮 Samantha Games</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #111;
-      color: #fff;
-      font-family: "Segoe UI", sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
+    body { background: #111; color: #fff; font-family: "Segoe UI", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
     p { color: #888; margin-bottom: 3rem; font-size: 1rem; }
-    .games {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .card {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 16px;
-      padding: 2rem 2.5rem;
-      text-align: center;
-      text-decoration: none;
-      color: #fff;
-      transition: transform 0.2s, border-color 0.2s;
-      width: 200px;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: #666;
-    }
+    .games { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 2rem 2.5rem; text-align: center; text-decoration: none; color: #fff; transition: transform 0.2s, border-color 0.2s; width: 200px; }
+    .card:hover { transform: translateY(-4px); border-color: #666; }
     .card .emoji { font-size: 4rem; display: block; margin-bottom: 1rem; }
     .card .name { font-size: 1.2rem; font-weight: 600; }
     .card .desc { font-size: 0.85rem; color: #888; margin-top: 0.4rem; }
@@ -49,16 +22,9 @@
   <h1>🎮 Samantha Games</h1>
   <p>Made with ☀️ by Samantha</p>
   <div class="games">
-    <a class="card" href="tetris.html">
-      <span class="emoji">🧱</span>
-      <div class="name">Tetris</div>
-      <div class="desc">클래식 테트리스</div>
-    </a>
-    <a class="card" href="dino.html">
-      <span class="emoji">🦕</span>
-      <div class="name">Dino</div>
-      <div class="desc">크롬 공룡 게임</div>
-    </a>
+    <a class="card" href="tetris.html"><span class="emoji">🧱</span><div class="name">Tetris</div><div class="desc">클래식 테트리스</div></a>
+    <a class="card" href="dino.html"><span class="emoji">🦕</span><div class="name">Dino</div><div class="desc">크롬 공룡 게임</div></a>
+    <a class="card" href="breakout.html"><span class="emoji">🏓</span><div class="name">Breakout</div><div class="desc">벽돌깨기</div></a>
   </div>
   <footer>sam-querypie · github.io/games</footer>
 </body>
