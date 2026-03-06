@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaga</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: monospace; }
+  canvas { border: 1px solid #222; }
+  #info { color: #555; font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="480" height="640"></canvas>
+<div id="info">← → 이동 &nbsp;|&nbsp; SPACE 발사 &nbsp;|&nbsp; 모바일: 터치</div>
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+
+// ── 별 배경 ──
+const stars = Array.from({length: 80}, () => ({
+  x: Math.random() * 480,
+  y: Math.random() * 640,
+  s: Math.random() * 1.5 + 0.5,
+  sp: Math.random() * 1 + 0.3
+}));
+
+// ── 게임 상태 ──
+let state = 'start'; // start | play | over | clear
+let score = 0, lives = 3, level = 1;
+
+// ── 플레이어 ──
+const player = { x: 220, y: 580, w: 32, h: 28, speed: 4, bullets: [], shootCd: 0 };
+
+// ── 적 ──
+let enemies = [];
+let enemyBullets = [];
+let divers = []; // 다이브 중인 적
+let enemyDir = 1;
+let enemyMoveTimer = 0;
+
+function spawnEnemies() {
+  enemies = [];
+  divers = [];
+  enemyBullets = [];
+  const cols = 8, rows = 4;
+  for (let r = 0; r < rows; r++) {
+    for (let cc = 0; cc < cols; cc++) {
+      enemies.push({
+        x: 60 + cc * 48,
+        y: 80 + r * 44,
+        w: 28, h: 24,
+        type: r === 0 ? 'boss' : r <= 1 ? 'bee' : 'bug',
+        alive: true,
+        diveOffset: 0,
+        originX: 60 + cc * 48,
+        originY: 80 + r * 44,
+      });
+    }
+  }
+}
+
+// ── 입력 ──
+const keys = {};
+document.addEventListener('keydown', e => { keys[e.code] = true; });
+document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// 터치
+let touchX = null;
+c.addEventListener('touchstart', e => { e.preventDefault(); touchX = e.touches[0].clientX; });
+c.addEventListener('touchmove', e => { e.preventDefault(); touchX = e.touches[0].clientX; });
+c.addEventListener('touchend', e => { e.preventDefault(); touchX = null; shoot(); });
+
+function shoot() {
+  if (player.shootCd > 0) return;
+  player.bullets.push({ x: player.x + 14, y: player.y });
+  player.shootCd = 18;
+}
+
+// ── 그리기 함수 ──
+function drawPlayer(x, y) {
+  ctx.fillStyle = '#4af';
+  // 동체
+  ctx.fillRect(x + 10, y + 8, 12, 18);
+  // 날개
+  ctx.fillStyle = '#28d';
+  ctx.fillRect(x, y + 16, 32, 8);
+  // 노즐
+  ctx.fillStyle = '#8ef';
+  ctx.fillRect(x + 14, y, 4, 12);
+  // 엔진 불꽃
+  ctx.fillStyle = `hsl(${Date.now()/10%60+20},100%,60%)`;
+  ctx.fillRect(x + 12, y + 26, 8, 4 + Math.random() * 4);
+}
+
+function drawBoss(x, y) {
+  ctx.fillStyle = '#f55';
+  ctx.fillRect(x + 4, y, 20, 8);
+  ctx.fillRect(x, y + 6, 28, 10);
+  ctx.fillRect(x + 6, y + 14, 16, 8);
+  ctx.fillStyle = '#ff0';
+  ctx.fillRect(x + 10, y + 4, 8, 6);
+}
+
+function drawBee(x, y) {
+  ctx.fillStyle = '#fa0';
+  ctx.fillRect(x + 8, y, 12, 10);
+  ctx.fillRect(x + 4, y + 8, 20, 8);
+  ctx.fillRect(x + 8, y + 14, 12, 6);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(x + 2, y + 4, 6, 10);
+  ctx.fillRect(x + 20, y + 4, 6, 10);
+}
+
+function drawBug(x, y) {
+  ctx.fillStyle = '#0f8';
+  ctx.fillRect(x + 6, y + 2, 16, 16);
+  ctx.fillRect(x + 10, y, 8, 6);
+  ctx.fillStyle = '#0a5';
+  ctx.fillRect(x, y + 8, 8, 8);
+  ctx.fillRect(x + 20, y + 8, 8, 8);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(x + 8, y + 4, 4, 4);
+  ctx.fillRect(x + 16, y + 4, 4, 4);
+}
+
+function drawEnemy(e) {
+  if (e.type === 'boss') drawBoss(e.x, e.y);
+  else if (e.type === 'bee') drawBee(e.x, e.y);
+  else drawBug(e.x, e.y);
+}
+
+// ── HUD ──
+function drawHUD() {
+  ctx.fillStyle = '#fff';
+  ctx.font = '14px monospace';
+  ctx.fillText(`SCORE ${score}`, 10, 20);
+  ctx.fillText(`LEVEL ${level}`, 200, 20);
+  ctx.fillText(`♥`.repeat(lives), 380, 20);
+}
+
+// ── 화면들 ──
+function drawStart() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, 480, 640);
+  drawStars();
+  ctx.fillStyle = '#f55';
+  ctx.font = 'bold 48px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('GALAGA', 240, 220);
+  ctx.fillStyle = '#fa0';
+  ctx.font = '14px monospace';
+  ctx.fillText('Made with ☀️ by Samantha', 240, 260);
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px monospace';
+  ctx.fillText('SPACE / 터치로 시작', 240, 340);
+  ctx.textAlign = 'left';
+}
+
+function drawOver() {
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(0, 0, 480, 640);
+  ctx.fillStyle = '#f55';
+  ctx.font = 'bold 40px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('GAME OVER', 240, 280);
+  ctx.fillStyle = '#fff';
+  ctx.font = '18px monospace';
+  ctx.fillText(`SCORE: ${score}`, 240, 330);
+  ctx.font = '14px monospace';
+  ctx.fillText('SPACE / 터치로 재시작', 240, 380);
+  ctx.textAlign = 'left';
+}
+
+function drawClear() {
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(0, 0, 480, 640);
+  ctx.fillStyle = '#4f8';
+  ctx.font = 'bold 36px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('STAGE CLEAR!', 240, 280);
+  ctx.fillStyle = '#fff';
+  ctx.font = '18px monospace';
+  ctx.fillText(`SCORE: ${score}`, 240, 330);
+  ctx.font = '14px monospace';
+  ctx.fillText('SPACE / 터치로 다음 레벨', 240, 380);
+  ctx.textAlign = 'left';
+}
+
+function drawStars() {
+  stars.forEach(s => {
+    ctx.fillStyle = `rgba(255,255,255,${0.3 + s.s * 0.3})`;
+    ctx.fillRect(s.x, s.y, s.s, s.s);
+  });
+}
+
+// ── 충돌 ──
+function collide(a, b) {
+  return a.x < b.x + b.w && a.x + (a.w||4) > b.x &&
+         a.y < b.y + b.h && a.y + (a.h||8) > b.y;
+}
+
+// ── 초기화 ──
+function init() {
+  score = 0; lives = 3; level = 1;
+  player.x = 220; player.bullets = []; player.shootCd = 0;
+  spawnEnemies();
+  state = 'play';
+}
+
+function nextLevel() {
+  level++;
+  player.bullets = [];
+  player.shootCd = 0;
+  spawnEnemies();
+  state = 'play';
+}
+
+// ── 메인 루프 ──
+let lastTime = 0;
+let diveTimer = 0;
+let shootTimer = 0;
+
+function update(dt) {
+  // 별 이동
+  stars.forEach(s => { s.y += s.sp; if (s.y > 640) { s.y = 0; s.x = Math.random() * 480; } });
+
+  if (state === 'start') {
+    if (keys['Space']) { keys['Space'] = false; init(); }
+    return;
+  }
+  if (state === 'over' || state === 'clear') {
+    if (keys['Space']) {
+      keys['Space'] = false;
+      state === 'clear' ? nextLevel() : init();
+    }
+    return;
+  }
+
+  // 플레이어 이동
+  if ((keys['ArrowLeft'] || keys['KeyA']) && player.x > 0) player.x -= player.speed;
+  if ((keys['ArrowRight'] || keys['KeyD']) && player.x < 448) player.x += player.speed;
+
+  // 터치 이동
+  if (touchX !== null) {
+    const rect = c.getBoundingClientRect();
+    const tx = (touchX - rect.left) * (480 / rect.width) - 16;
+    player.x += (tx - player.x) * 0.15;
+    player.x = Math.max(0, Math.min(448, player.x));
+  }
+
+  // 발사
+  player.shootCd--;
+  if (keys['Space'] && player.shootCd <= 0) shoot();
+
+  // 플레이어 총알 이동
+  player.bullets = player.bullets.filter(b => b.y > 0);
+  player.bullets.forEach(b => b.y -= 8);
+
+  // 적 편대 이동
+  enemyMoveTimer++;
+  const moveInterval = Math.max(8, 30 - level * 3);
+  if (enemyMoveTimer >= moveInterval) {
+    enemyMoveTimer = 0;
+    const alive = enemies.filter(e => e.alive && !divers.includes(e));
+    const leftmost = Math.min(...alive.map(e => e.x));
+    const rightmost = Math.max(...alive.map(e => e.x + e.w));
+    if (rightmost >= 476 || leftmost <= 4) enemyDir *= -1;
+    alive.forEach(e => {
+      e.x += enemyDir * 12;
+      e.originX = e.x;
+    });
+  }
+
+  // 다이브 공격
+  diveTimer++;
+  if (diveTimer > Math.max(60, 120 - level * 10)) {
+    diveTimer = 0;
+    const alive = enemies.filter(e => e.alive && !divers.includes(e));
+    if (alive.length > 0) {
+      const diver = alive[Math.floor(Math.random() * alive.length)];
+      divers.push(diver);
+      diver.divePhase = 0;
+      diver.diveTargetX = player.x;
+    }
+  }
+
+  // 다이버 이동
+  divers.forEach(d => {
+    if (!d.alive) return;
+    d.divePhase++;
+    if (d.divePhase < 60) {
+      // 아래로 돌진
+      d.y += 4 + level;
+      d.x += (d.diveTargetX - d.x) * 0.05;
+    } else if (d.divePhase < 120) {
+      // 위로 복귀
+      d.y -= 3;
+      d.x += (d.originX - d.x) * 0.05;
+    } else {
+      // 원위치 복귀
+      d.y = d.originY;
+      d.x = d.originX;
+      divers.splice(divers.indexOf(d), 1);
+    }
+  });
+
+  // 적 총알
+  shootTimer++;
+  if (shootTimer > Math.max(40, 90 - level * 8)) {
+    shootTimer = 0;
+    const alive = enemies.filter(e => e.alive);
+    if (alive.length > 0) {
+      const shooter = alive[Math.floor(Math.random() * alive.length)];
+      enemyBullets.push({ x: shooter.x + 12, y: shooter.y + shooter.h, w: 4, h: 10 });
+    }
+  }
+  enemyBullets = enemyBullets.filter(b => b.y < 650);
+  enemyBullets.forEach(b => b.y += 5 + level);
+
+  // 충돌: 플레이어 총알 vs 적
+  player.bullets.forEach(b => {
+    b.w = 4; b.h = 12;
+    enemies.forEach(e => {
+      if (!e.alive) return;
+      if (collide(b, e)) {
+        e.alive = false;
+        divers = divers.filter(d => d !== e);
+        b.y = -100;
+        score += e.type === 'boss' ? 150 : e.type === 'bee' ? 80 : 50;
+      }
+    });
+  });
+
+  // 충돌: 적 총알 vs 플레이어
+  const pHit = { x: player.x + 4, y: player.y + 4, w: 24, h: 20 };
+  enemyBullets.forEach(b => {
+    if (collide(b, pHit)) {
+      b.y = -100;
+      lives--;
+      player.x = 220;
+      if (lives <= 0) state = 'over';
+    }
+  });
+
+  // 충돌: 다이버 vs 플레이어
+  divers.forEach(d => {
+    if (!d.alive) return;
+    if (collide(d, pHit)) {
+      d.alive = false;
+      divers = divers.filter(x => x !== d);
+      lives--;
+      if (lives <= 0) state = 'over';
+    }
+  });
+
+  // 스테이지 클리어
+  if (enemies.every(e => !e.alive)) state = 'clear';
+}
+
+function draw() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, 480, 640);
+  drawStars();
+
+  if (state === 'start') { drawStart(); return; }
+
+  // 적 그리기
+  enemies.forEach(e => { if (e.alive) drawEnemy(e); });
+
+  // 플레이어
+  drawPlayer(player.x, player.y);
+
+  // 총알들
+  ctx.fillStyle = '#ff0';
+  player.bullets.forEach(b => ctx.fillRect(b.x, b.y, 4, 12));
+  ctx.fillStyle = '#f44';
+  enemyBullets.forEach(b => ctx.fillRect(b.x, b.y, 4, 10));
+
+  drawHUD();
+
+  if (state === 'over') drawOver();
+  if (state === 'clear') drawClear();
+}
+
+function loop(ts) {
+  const dt = Math.min((ts - lastTime) / 16, 3);
+  lastTime = ts;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+spawnEnemies();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
