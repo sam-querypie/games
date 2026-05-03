@@ -304,10 +304,25 @@
     <!-- Mobile touch controls (always visible) -->
     <div class="mobile-controls" id="mobileControls">
       <div class="control-row">
-        <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()">⬅️</div>
-        <div class="touch-btn" id="btnRight" ontouchstart="moveRight()">➡️</div>
+        <div class="touch-btn" id="btnLeft"
+          ontouchstart="event.preventDefault(); holdStart('left')"
+          ontouchend="event.preventDefault(); holdStop('left')"
+          onmousedown="event.preventDefault(); holdStart('left')"
+          onmouseup="event.preventDefault(); holdStop('left')"
+          onmouseleave="event.preventDefault(); holdStop('left')">⬅️</div>
+        <div class="touch-btn" id="btnRight"
+          ontouchstart="event.preventDefault(); holdStart('right')"
+          ontouchend="event.preventDefault(); holdStop('right')"
+          onmousedown="event.preventDefault(); holdStart('right')"
+          onmouseup="event.preventDefault(); holdStop('right')"
+          onmouseleave="event.preventDefault(); holdStop('right')">➡️</div>
         <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
-        <div class="touch-btn" id="btnDown" ontouchstart="onDownTap()">⬇️</div>
+        <div class="touch-btn" id="btnDown"
+          ontouchstart="event.preventDefault(); holdStart('down')"
+          ontouchend="event.preventDefault(); holdStop('down')"
+          onmousedown="event.preventDefault(); holdStart('down')"
+          onmouseup="event.preventDefault(); holdStop('down')"
+          onmouseleave="event.preventDefault(); holdStop('down')">⬇️</div>
       </div>
     </div>
   </div>
@@ -836,6 +851,28 @@ function togglePanel() {
 }
 
 // Touch/mouse button handlers for mobile
+let holdTimer = null;
+let holdInterval = null;
+function holdStart(dir) {
+  if (gameOver || !piece || paused) return;
+  if (dir === 'left') moveLeft();
+  else if (dir === 'right') moveRight();
+  else if (dir === 'down') mobileDropDown();
+  if (holdTimer) clearTimeout(holdTimer);
+  if (holdInterval) clearInterval(holdInterval);
+  holdTimer = setTimeout(() => {
+    holdInterval = setInterval(() => {
+      if (gameOver || !piece || paused) { holdStop(dir); return; }
+      if (dir === 'left') moveLeft();
+      else if (dir === 'right') moveRight();
+      else if (dir === 'down') mobileDropDown();
+    }, 70);
+  }, 200);
+}
+function holdStop(dir) {
+  if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+  if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+}
 function moveLeft() {
   if (gameOver || !piece || paused) return;
   if (valid({...piece,x:piece.x-1})) { piece.x--; playSFX(sfxMove); }
