@@ -137,6 +137,34 @@
       margin-top: 8px;
       letter-spacing: 1px;
     }
+    .theme-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: 4px;
+    }
+    .theme-btn {
+      flex: 1;
+      min-width: 32px;
+      padding: 3px 4px;
+      font-size: 9px;
+      background: #2a1a45;
+      border: 1px solid #3d0f60;
+      border-radius: 4px;
+      color: #aa88bb;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .theme-btn:hover {
+      border-color: #7b2ff7;
+      color: #d4aaff;
+    }
+    .theme-btn.active {
+      background: linear-gradient(135deg, #00d4ff22, #7b2ff722);
+      border-color: #00d4ff;
+      color: #fff;
+    }
     #soundStatus {
       position: absolute;
       top: 8px;
@@ -165,6 +193,17 @@
     <div class="info-box"><label>Lines</label><div class="value" id="lines">0</div></div>
     <div class="next-box"><label>Next</label><canvas id="nextCanvas" width="100" height="100"></canvas></div>
     <div class="music-info">Now Playing<br><span id="themeName">-</span></div>
+    <div class="info-box" style="padding:6px 10px;">
+      <label style="display:block;margin-bottom:4px;">Theme</label>
+      <div class="theme-selector" id="themeSelector">
+        <div class="theme-btn" data-theme="A" onclick="selectTheme(this)">A</div>
+        <div class="theme-btn" data-theme="B" onclick="selectTheme(this)">B</div>
+        <div class="theme-btn" data-theme="C" onclick="selectTheme(this)">C</div>
+        <div class="theme-btn" data-theme="D" onclick="selectTheme(this)">D</div>
+        <div class="theme-btn" data-theme="E" onclick="selectTheme(this)">E</div>
+        <div class="theme-btn" data-theme="" onclick="selectTheme(this)">R</div>
+      </div>
+    </div>
     <button id="startBtn" onclick="startGame()">START</button>
     <button id="pauseBtn" onclick="togglePause()" style="display:none;">PAUSE</button>
     <div class="controls">
@@ -173,7 +212,8 @@
       <span>&#8595;</span> Soft Drop<br>
       <span>Space</span> Hard Drop<br>
       <span>P</span> Pause<br>
-      <span>M</span> Toggle Sound
+      <span>M</span> Toggle Sound<br>
+      <span>T</span> Change Theme
     </div>
   </div>
 </div>
@@ -235,7 +275,7 @@ function sfxClear(lines) {
 
 // === NOTE FREQUENCY TABLE ===
 const NF = {
-  'C3':130.81,'C#3':138.59,'D3':146.83,'D#3':155.56,'E3':164.81,'F3':174.61,'F#3':185.00,
+  'D2':73.42,'E2':82.41,'F2':87.31,'G2':98.00,'A2':110.00,'B2':123.47,'C3':130.81,'C#3':138.59,'D3':146.83,'D#3':155.56,'E3':164.81,'F3':174.61,'F#3':185.00,
   'G3':196.00,'G#3':207.65,'A3':220.00,'A#3':233.08,'B3':246.94,
   'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,
   'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,
@@ -361,6 +401,46 @@ const THEMES = {
       {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
       {n:'A2',d:.25},{n:0,d:.25}
     ]
+  },
+  E: {
+    name: 'Bradinsky (Arcade E min)', leadType:'square', bassType:'square', leadVol:0.14, bassVol:0.10, tempo:136,
+    melody: [
+      // Section A - bar 1
+      {n:['B3','B4'],d:.125},{n:'B5',d:.125},{n:'B4',d:.125},{n:'C6',d:.125},
+      {n:['B3','B5'],d:.125},{n:'A5',d:.125},{n:['F#3','C6'],d:.125},{n:'B5',d:.125},
+      // bar 2
+      {n:['C3','A5'],d:.125},{n:'G5',d:.125},{n:['D#3','A5'],d:.125},{n:'B5',d:.125},
+      {n:['E3','G5'],d:.125},{n:'A5',d:.125},{n:['D#3','G5'],d:.125},{n:0,d:.125},
+      // bar 3
+      {n:['E3','B5'],d:.125},{n:['E3','B4'],d:.125},{n:['F#3','B5'],d:.125},{n:['F#3','C6'],d:.125},
+      {n:['G3','B5'],d:.125},{n:['A2','B4'],d:.125},{n:['A#2','B5'],d:.125},{n:['B2','C6'],d:.125},
+      // bar 4
+      {n:['A2','B5'],d:.125},{n:'B4',d:.125},{n:['A2','B5'],d:.125},{n:'C6',d:.125},
+      {n:['A#2','A5'],d:.125},{n:'B4',d:.125},{n:['G#3','A5'],d:.125},{n:'G5',d:.125},
+      // bar 5
+      {n:['G3','E5'],d:.125},{n:'G5',d:.125},{n:['F#3','E5'],d:.125},{n:['G3','G5'],d:.125},
+      {n:['B2','F#5'],d:.125},{n:['A2','G5'],d:.125},{n:['B2','E5'],d:.125},{n:'G5',d:.125},
+      // bar 6
+      {n:['A2','F#5'],d:.125},{n:'A5',d:.125},{n:['A2','F#5'],d:.125},{n:'G5',d:.125},
+      {n:['B2','E5'],d:.125},{n:'E5',d:.125},{n:['C3','E5'],d:.25},
+      // bar 7 (transition)
+      {n:['G3','B5'],d:.125},{n:['G3','C6'],d:.125},{n:['G3','A5'],d:.125},{n:['F#3','B5'],d:.125},
+      {n:['E3','A5'],d:.125},{n:'G5',d:.125},{n:['D#3','A5'],d:.125},{n:'B5',d:.125},
+      // bar 8
+      {n:'B5',d:.125},{n:'B5',d:.125},{n:'C6',d:.125},{n:'B5',d:.125},
+      {n:'A5',d:.125},{n:'G5',d:.125},{n:['E3','F#5'],d:.125},{n:'G5',d:.125},
+    ],
+    bass: [
+      // Section A bass
+      {n:'B2',d:.25},{n:0,d:.25},{n:'B2',d:.25},{n:0,d:.25},
+      {n:'A2',d:.25},{n:0,d:.25},{n:'A2',d:.25},{n:0,d:.25},
+      {n:'E2',d:.25},{n:0,d:.25},{n:'E2',d:.25},{n:0,d:.25},
+      {n:'A2',d:.25},{n:0,d:.25},{n:'A2',d:.25},{n:0,d:.25},
+      {n:'D2',d:.25},{n:0,d:.25},{n:'D2',d:.25},{n:0,d:.25},
+      {n:'D2',d:.25},{n:0,d:.25},{n:'D2',d:.25},{n:0,d:.25},
+      {n:'E2',d:.25},{n:0,d:.25},{n:'E2',d:.25},{n:0,d:.25},
+      {n:'B2',d:.25},{n:0,d:.25},{n:'B2',d:.25},{n:0,d:.25},
+    ]
   }
 };
 
@@ -374,13 +454,46 @@ const LOOKAHEAD = 0.1;
 
 function tempoToBps(tempo) { return 60 / tempo; }
 
-function initTheme() {
+let selectedThemeKey = null; // null = random
+
+function initTheme(themeKey) {
   const keys = Object.keys(THEMES);
-  const key = keys[Math.floor(Math.random() * keys.length)];
+  const key = themeKey || (selectedThemeKey || keys[Math.floor(Math.random() * keys.length)]);
   const t = THEMES[key];
   const bps = tempoToBps(t.tempo);
   currentTheme = { ...t, smelody: t.melody.map(m => ({n: m.n, d: m.d * bps})), sbass: t.bass.map(m => ({n: m.n, d: m.d * bps})) };
   document.getElementById('themeName').textContent = currentTheme.name;
+  // update theme selector UI
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === key);
+  });
+}
+
+function selectTheme(btn) {
+  const key = btn.dataset.theme;
+  selectedThemeKey = key || null;
+  // If game is running, restart BGM with new theme
+  if (currentTheme && bgmTimerID) {
+    stopBGM();
+    initTheme(key);
+    bgmMelodyIdx = 0; bgmMelodyNext = audioCtx.currentTime + 0.05;
+    bgmBassIdx = 0; bgmBassNext = audioCtx.currentTime + 0.05;
+    scheduleTheme();
+  } else {
+    initTheme(key);
+  }
+}
+
+function cycleTheme() {
+  const keys = Object.keys(THEMES);
+  const currentIdx = selectedThemeKey ? keys.indexOf(selectedThemeKey) : -1;
+  const nextIdx = (currentIdx + 1) % (keys.length + 1);
+  if (nextIdx < keys.length) {
+    selectedThemeKey = keys[nextIdx];
+  } else {
+    selectedThemeKey = null; // back to random
+  }
+  selectTheme(document.querySelector(`[data-theme="${selectedThemeKey || ''}"]`) || document.querySelector('[data-theme=""]'));
 }
 
 function scheduleTheme() {
@@ -574,6 +687,7 @@ function togglePause() {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'm' || e.key === 'M') { toggleSound(); return; }
+  if (e.key === 't' || e.key === 'T') { cycleTheme(); return; }
   if (gameOver || !piece) return;
   if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
   if (paused) return;
