@@ -177,6 +177,72 @@
     }
     #soundStatus.on { color: #2ed573; }
     #soundStatus.off { color: #ff4757; }
+    
+    /* Mobile touch controls */
+    .mobile-controls {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.7));
+      padding: 12px;
+      z-index: 5;
+    }
+    .control-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+    .touch-btn {
+      flex: 0 1 50px;
+      padding: 12px 8px;
+      background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+      border: 1px solid #00d4ff;
+      border-radius: 6px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: all 0.1s;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .touch-btn:active {
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+    .touch-btn.wide {
+      flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .mobile-controls {
+        display: flex;
+        flex-direction: column;
+      }
+      .container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 12px;
+      }
+      canvas {
+        max-width: 100vw;
+        height: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -185,6 +251,18 @@
     <div id="soundStatus" class="on" onclick="toggleSound()">&#128266; ON</div>
     <canvas id="gameCanvas" width="300" height="600"></canvas>
     <div id="overlay" style="display:none;"></div>
+    
+    <!-- Mobile touch controls -->
+    <div class="mobile-controls" id="mobileControls">
+      <div class="control-row">
+        <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()" ontouchend="stopMove()">⬅️</div>
+        <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
+        <div class="touch-btn" id="btnRight" ontouchstart="moveRight()" ontouchend="stopMove()">➡️</div>
+      </div>
+      <div class="control-row">
+        <div class="touch-btn wide" id="btnDrop" ontouchstart="hardDrop()">⬇️ DROP</div>
+      </div>
+    </div>
   </div>
   <div class="panel">
     <h1>TETRIS</h1>
@@ -307,7 +385,7 @@ const THEMES = {
     ]
   },
   B: {
-    name: 'Bradinsky (GB B-Type)', leadType:'square', bassType:'square', leadVol:0.12, bassVol:0.08, tempo:30,
+    name: 'Bradinsky (GB B-Type)', leadType:'square', bassType:'square', leadVol:0.12, bassVol:0.08, tempo:40,
     melody: [
       // bar 1
       {n:'E4',d:.125},{n:'E4',d:.125},{n:'F#4',d:.125},{n:'G4',d:.125},{n:'A4',d:.125},{n:'G4',d:.125},{n:'F#4',d:.125},{n:'E4',d:.125},
@@ -348,7 +426,7 @@ const THEMES = {
     ]
   },
   D: {
-    name: 'Korobeiniki (Piano)', leadType:'sine', bassType:'triangle', leadVol:0.15, bassVol:0.10, tempo:30,
+    name: 'Korobeiniki (Piano)', leadType:'sine', bassType:'triangle', leadVol:0.15, bassVol:0.10, tempo:40,
     attack: 0.01, sustain: 0.5, release: 0.4,
     melody: [
       // m1: | (A4+D5) B4 C5 D5 C5 B4 |
@@ -703,6 +781,27 @@ function togglePause() {
   else { gameLoop=setInterval(tick,Math.max(100,800-(level-1)*70)); startBGM(); hideOverlay(); btn.textContent='PAUSE'; }
 }
 
+// Touch/mouse button handlers for mobile
+function moveLeft() {
+  if (gameOver || !piece || paused) return;
+  if (valid({...piece,x:piece.x-1})) { piece.x--; playSFX(sfxMove); }
+  draw();
+}
+function moveRight() {
+  if (gameOver || !piece || paused) return;
+  if (valid({...piece,x:piece.x+1})) { piece.x++; playSFX(sfxMove); }
+  draw();
+}
+function rotateBlock() {
+  if (gameOver || !piece || paused) return;
+  const r=rotate(piece.shape);
+  if (valid({...piece,shape:r})) { piece.shape=r; playSFX(sfxRotate); }
+  draw();
+}
+function stopMove() {
+  // Button state management (unused for now)
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'm' || e.key === 'M') { toggleSound(); return; }
   if (e.key === 't' || e.key === 'T') { cycleTheme(); return; }
@@ -710,10 +809,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
   if (paused) return;
   switch(e.key) {
-    case 'ArrowLeft': if (valid({...piece,x:piece.x-1})) { piece.x--; playSFX(sfxMove); } break;
-    case 'ArrowRight': if (valid({...piece,x:piece.x+1})) { piece.x++; playSFX(sfxMove); } break;
+    case 'ArrowLeft': moveLeft(); break;
+    case 'ArrowRight': moveRight(); break;
     case 'ArrowDown': if (valid({...piece,y:piece.y+1})) { piece.y++; score++; updateUI(); } else place(); break;
-    case 'ArrowUp': { const r=rotate(piece.shape); if (valid({...piece,shape:r})) { piece.shape=r; playSFX(sfxRotate); } break; }
+    case 'ArrowUp': rotateBlock(); break;
     case ' ': e.preventDefault(); hardDrop(); break;
   }
   draw();
