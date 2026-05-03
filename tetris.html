@@ -188,24 +188,23 @@
     .control-row {
       display: flex;
       gap: 8px;
-      margin-bottom: 8px;
       justify-content: center;
     }
     .touch-btn {
-      flex: 0 1 50px;
-      padding: 12px 8px;
+      flex: 1;
+      padding: 10px 6px;
       background: linear-gradient(135deg, #00d4ff, #7b2ff7);
       border: 1px solid #00d4ff;
       border-radius: 6px;
       color: white;
-      font-size: 12px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
       transition: all 0.1s;
-      min-height: 40px;
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -213,9 +212,6 @@
     .touch-btn:active {
       opacity: 0.7;
       transform: scale(0.95);
-    }
-    .touch-btn.wide {
-      flex: 1;
     }
     
     @media (max-width: 768px) {
@@ -268,12 +264,10 @@
     <!-- Mobile touch controls -->
     <div class="mobile-controls" id="mobileControls">
       <div class="control-row">
-        <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()" ontouchend="stopMove()">⬅️</div>
+        <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()">⬅️</div>
+        <div class="touch-btn" id="btnRight" ontouchstart="moveRight()">➡️</div>
         <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
-        <div class="touch-btn" id="btnRight" ontouchstart="moveRight()" ontouchend="stopMove()">➡️</div>
-      </div>
-      <div class="control-row">
-        <div class="touch-btn wide" id="btnDrop" ontouchstart="hardDrop()">⬇️ DROP</div>
+        <div class="touch-btn" id="btnDown" ontouchstart="onDownTap()">⬇️</div>
       </div>
     </div>
   </div>
@@ -811,8 +805,21 @@ function rotateBlock() {
   if (valid({...piece,shape:r})) { piece.shape=r; playSFX(sfxRotate); }
   draw();
 }
-function stopMove() {
-  // Button state management (unused for now)
+
+// Double-tap to drop handler
+let lastDownTap = 0;
+function onDownTap() {
+  if (gameOver || !piece || paused) return;
+  const now = Date.now();
+  if (now - lastDownTap < 300) {
+    // Double tap detected - hard drop
+    hardDrop();
+  } else {
+    // Single tap - soft drop
+    if (valid({...piece,y:piece.y+1})) { piece.y++; score++; updateUI(); } else place();
+    draw();
+  }
+  lastDownTap = now;
 }
 
 document.addEventListener('keydown', e => {
