@@ -163,6 +163,7 @@
       <canvas id="nextCanvas" width="100" height="100"></canvas>
     </div>
     <button id="startBtn" onclick="startGame()">START</button>
+    <button id="pauseBtn" onclick="togglePause()" style="display:none; background: linear-gradient(135deg, #ff4757, #ffa502);">PAUSE</button>
     <div class="controls">
       <span>&#8592;&#8594;</span> Move<br>
       <span>&#8593;</span> Rotate<br>
@@ -560,6 +561,7 @@ function startGame() {
   drawNext();
   hideOverlay();
   document.getElementById('startBtn').textContent = 'RESTART';
+  document.getElementById('pauseBtn').style.display = 'block';
   // Audio init
   resumeAudio().then(() => {
     startBGM();
@@ -572,6 +574,7 @@ function endGame() {
   stopBGM();
   playSFX(sfxGameOver);
   showOverlay('GAME OVER', `Score: ${score.toLocaleString()}`);
+  document.getElementById('pauseBtn').style.display = 'none';
 }
 
 document.addEventListener('keydown', e => {
@@ -581,14 +584,7 @@ document.addEventListener('keydown', e => {
   }
   if (gameOver || !piece) return;
   if (e.key === 'p' || e.key === 'P') {
-    paused = !paused;
-    if (paused) {
-      clearInterval(gameLoop);
-      showOverlay('PAUSED', 'Press P to resume');
-    } else {
-      gameLoop = setInterval(tick, Math.max(100, 800 - (level - 1) * 70));
-      hideOverlay();
-    }
+    togglePause();
     return;
   }
   if (paused) return;
@@ -616,7 +612,22 @@ document.addEventListener('keydown', e => {
   draw();
 });
 
-// Initial
+function togglePause() {
+  if (gameOver || !piece) return;
+  paused = !paused;
+  const btn = document.getElementById('pauseBtn');
+  if (paused) {
+    clearInterval(gameLoop);
+    stopBGM();
+    showOverlay('PAUSED', 'Press P or click Pause to resume');
+    if (btn) btn.textContent = 'RESUME';
+  } else {
+    gameLoop = setInterval(tick, Math.max(100, 800 - (level - 1) * 70));
+    startBGM();
+    hideOverlay();
+    if (btn) btn.textContent = 'PAUSE';
+  }
+}
 ctx.fillStyle = '#0f0f23';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 showOverlay('TETRIS', 'Press START to play');
