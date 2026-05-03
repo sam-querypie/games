@@ -283,7 +283,8 @@
     
     <!-- Mobile touch controls -->
     <div class="mobile-controls" id="mobileControls">
-      <div class="control-row">
+      <div class="mc-toggle" id="mcToggle" onclick="toggleMobileControls()">&#9650; Controls</div>
+      <div class="control-row" id="mcPanel" style="display:none;">
         <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()">⬅️</div>
         <div class="touch-btn" id="btnRight" ontouchstart="moveRight()">➡️</div>
         <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
@@ -806,6 +807,18 @@ function togglePause() {
   const btn = document.getElementById('pauseBtn');
   if (paused) { clearInterval(gameLoop); stopBGM(); showOverlay('PAUSED','Press P or click Resume'); btn.textContent='RESUME'; }
   else { gameLoop=setInterval(tick,Math.max(100,800-(level-1)*70)); startBGM(); hideOverlay(); btn.textContent='PAUSE'; }
+}
+
+function toggleMobileControls() {
+  const panel = document.getElementById('mcPanel');
+  const toggle = document.getElementById('mcToggle');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'flex';
+    toggle.innerHTML = '&#9660; Controls';
+  } else {
+    panel.style.display = 'none';
+    toggle.innerHTML = '&#9650; Controls';
+  }
 }
 
 // Touch/mouse button handlers for mobile
