@@ -855,9 +855,11 @@ let holdTimer = null;
 let holdInterval = null;
 function holdStart(dir) {
   if (gameOver || !piece || paused) return;
+  // Down button: do nothing on hold, only double-tap triggers drop
+  if (dir === 'down') return;
+  
   if (dir === 'left') moveLeft();
   else if (dir === 'right') moveRight();
-  else if (dir === 'down') mobileDropDown();
   if (holdTimer) clearTimeout(holdTimer);
   if (holdInterval) clearInterval(holdInterval);
   holdTimer = setTimeout(() => {
@@ -865,7 +867,6 @@ function holdStart(dir) {
       if (gameOver || !piece || paused) { holdStop(dir); return; }
       if (dir === 'left') moveLeft();
       else if (dir === 'right') moveRight();
-      else if (dir === 'down') mobileDropDown();
     }, 70);
   }, 200);
 }
