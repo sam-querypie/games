@@ -920,14 +920,13 @@ function onDownTap() {
   if (gameOver || !piece || paused) return;
   const now = Date.now();
   if (now - lastDownTap < 300) {
-    // Double tap detected - hard drop
+    // Double tap detected (< 300ms) - hard drop
     hardDrop();
+    lastDownTap = 0; // Reset to prevent triple-tap
   } else {
-    // Single tap - soft drop
-    if (valid({...piece,y:piece.y+1})) { piece.y++; score++; updateUI(); } else place();
-    draw();
+    // Single tap - do nothing, wait for potential second tap
+    lastDownTap = now;
   }
-  lastDownTap = now;
 }
 
 document.addEventListener('keydown', e => {
