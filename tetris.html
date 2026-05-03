@@ -318,11 +318,11 @@
           onmouseleave="event.preventDefault(); holdStop('right')">➡️</div>
         <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
         <div class="touch-btn" id="btnDown"
-          ontouchstart="event.preventDefault(); holdStart('down')"
-          ontouchend="event.preventDefault(); holdStop('down')"
-          onmousedown="event.preventDefault(); holdStart('down')"
-          onmouseup="event.preventDefault(); holdStop('down')"
-          onmouseleave="event.preventDefault(); holdStop('down')">⬇️</div>
+          ontouchstart="handleDownTouch(event)"
+          ontouchend="handleDownRelease(event)"
+          onmousedown="mobileDropDown()"
+          onmouseup="mcDownFirstTap=0;"
+          onmouseleave="mcDownFirstTap=0;">⬇️</div>
       </div>
     </div>
   </div>
@@ -864,13 +864,13 @@ function holdStart(dir) {
   if (holdInterval) clearInterval(holdInterval);
   holdTimer = setTimeout(() => {
     holdInterval = setInterval(() => {
-      if (gameOver || !piece || paused) { holdStop(dir); return; }
+      if (gameOver || !piece || paused) { holdStop(); return; }
       if (dir === 'left') moveLeft();
       else if (dir === 'right') moveRight();
     }, 70);
   }, 200);
 }
-function holdStop(dir) {
+function holdStop() {
   if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
 }
@@ -897,6 +897,13 @@ function mobileDropDown() {
     mcDownFirstTap = now;
     softDrop();
   }
+}
+function handleDownTouch(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  mobileDropDown();
+}
+function handleDownRelease(e) {
+  if (e && e.preventDefault) e.preventDefault();
 }
 function moveLeft() {
   if (gameOver || !piece || paused) return;
