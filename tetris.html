@@ -873,6 +873,30 @@ function holdStop(dir) {
   if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
 }
+function softDrop() {
+  if (gameOver || !piece || paused) return;
+  if (valid({...piece, y: piece.y + 1})) {
+    piece.y++;
+    score++;
+    updateUI();
+    draw();
+  } else {
+    place();
+    draw();
+  }
+}
+let mcDownFirstTap = 0;
+function mobileDropDown() {
+  if (gameOver || !piece || paused) return;
+  const now = Date.now();
+  if (now - mcDownFirstTap < 300) {
+    hardDrop();
+    mcDownFirstTap = 0;
+  } else {
+    mcDownFirstTap = now;
+    softDrop();
+  }
+}
 function moveLeft() {
   if (gameOver || !piece || paused) return;
   if (valid({...piece,x:piece.x-1})) { piece.x--; playSFX(sfxMove); }
