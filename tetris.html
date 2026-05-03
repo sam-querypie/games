@@ -460,13 +460,25 @@ function initTheme(themeKey) {
   const keys = Object.keys(THEMES);
   const key = themeKey || (selectedThemeKey || keys[Math.floor(Math.random() * keys.length)]);
   const t = THEMES[key];
-  const bps = tempoToBps(t.tempo);
-  currentTheme = { ...t, smelody: t.melody.map(m => ({n: m.n, d: m.d * bps})), sbass: t.bass.map(m => ({n: m.n, d: m.d * bps})) };
+  currentTheme = { ...t, key };
   document.getElementById('themeName').textContent = currentTheme.name;
   // update theme selector UI
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === key);
   });
+}
+
+function applyGameTempo(level) {
+  if (!currentTheme) return;
+  // Level 1 = base tempo, each level adds 5% speed (max 2.0x at level 21)
+  const speedFactor = Math.min(2.0, 1.0 + (level - 1) * 0.05);
+  const newTempo = currentTheme.tempo * speedFactor;
+  const bps = tempoToBps(newTempo);
+  currentTheme.smelody = THEMES[currentTheme.key].melody.map(m => ({n: m.n, d: m.d * bps}));
+  currentTheme.sbass = THEMES[currentTheme.key].bass.map(m => ({n: m.n, d: m.d * bps}));
+  // Show tempo multiplier in UI
+  const speedText = speedFactor >= 2.0 ? '2.0x MAX' : speedFactor.toFixed(2) + 'x';
+  document.getElementById('themeName').textContent = currentTheme.name + ' • ' + speedText;
 }
 
 function selectTheme(btn) {
@@ -476,6 +488,7 @@ function selectTheme(btn) {
   if (currentTheme && bgmTimerID) {
     stopBGM();
     initTheme(key);
+    applyGameTempo(level);
     bgmMelodyIdx = 0; bgmMelodyNext = audioCtx.currentTime + 0.05;
     bgmBassIdx = 0; bgmBassNext = audioCtx.currentTime + 0.05;
     scheduleTheme();
@@ -544,6 +557,7 @@ function scheduleTheme() {
 function startBGM() {
   stopBGM();
   if (!currentTheme) initTheme();
+  applyGameTempo(level);
   bgmMelodyIdx = 0; bgmMelodyNext = audioCtx.currentTime + 0.05;
   bgmBassIdx = 0; bgmBassNext = audioCtx.currentTime + 0.05;
   scheduleTheme();
@@ -604,7 +618,11 @@ function clearLines() {
     const prevLevel = level;
     score += ([0,100,300,500,800][cleared] || 800) * level;
     lines += cleared; level = Math.floor(lines / 10) + 1;
-    if (level > prevLevel) playSFX(sfxLevelUp);
+    if (level > prevLevel) {
+      playSFX(sfxLevelUp);
+      // BGM tempo increases with level
+      applyGameTempo(level);
+    }
     updateUI(); clearInterval(gameLoop);
     gameLoop = setInterval(tick, Math.max(100, 800 - (level - 1) * 70));
   }
