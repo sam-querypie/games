@@ -202,6 +202,23 @@
       touch-action: manipulation;
     }
     .mc-toggle:active { background: rgba(0,212,255,0.2); }
+    .panel-toggle {
+      display: none;
+      width: 100%;
+      padding: 8px 0;
+      background: rgba(15,15,35,0.9);
+      border: 1px solid #0f3460;
+      border-radius: 4px;
+      color: #00d4ff;
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      margin-bottom: 8px;
+      touch-action: manipulation;
+    }
+    .panel-toggle:active { background: rgba(0,212,255,0.2); }
     .control-row {
       display: flex;
       gap: 8px;
@@ -248,8 +265,11 @@
         display: flex;
         flex-direction: column;
       }
-      .mc-toggle {
+      .panel-toggle {
         display: block;
+      }
+      .mc-toggle {
+        display: none !important;
       }
       .panel {
         width: 100%;
@@ -281,10 +301,9 @@
       <div id="overlay" style="display:none;"></div>
     </div>
     
-    <!-- Mobile touch controls -->
+    <!-- Mobile touch controls (always visible) -->
     <div class="mobile-controls" id="mobileControls">
-      <div class="mc-toggle" id="mcToggle" onclick="toggleMobileControls()">&#9650; Controls</div>
-      <div class="control-row" id="mcPanel" style="display:none;">
+      <div class="control-row">
         <div class="touch-btn" id="btnLeft" ontouchstart="moveLeft()">⬅️</div>
         <div class="touch-btn" id="btnRight" ontouchstart="moveRight()">➡️</div>
         <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
@@ -292,34 +311,29 @@
       </div>
     </div>
   </div>
-  <div class="panel">
-    <h1>TETRIS</h1>
-    <div class="info-box"><label>Score</label><div class="value" id="score">0</div></div>
-    <div class="info-box"><label>Level</label><div class="value" id="level">1</div></div>
-    <div class="info-box"><label>Lines</label><div class="value" id="lines">0</div></div>
-    <div class="next-box"><label>Next</label><canvas id="nextCanvas" width="100" height="100"></canvas></div>
-    <div class="music-info">Now Playing<br><span id="themeName">-</span></div>
-    <div class="info-box" style="padding:6px 10px;">
-      <label style="display:block;margin-bottom:4px;">Theme</label>
-      <div class="theme-selector" id="themeSelector">
-        <div class="theme-btn" data-theme="A" onclick="selectTheme(this)">A</div>
-        <div class="theme-btn" data-theme="B" onclick="selectTheme(this)">B</div>
-        <div class="theme-btn" data-theme="C" onclick="selectTheme(this)">C</div>
-        <div class="theme-btn" data-theme="D" onclick="selectTheme(this)">D</div>
-        <div class="theme-btn" data-theme="E" onclick="selectTheme(this)">E</div>
-        <div class="theme-btn" data-theme="" onclick="selectTheme(this)">R</div>
+  <div class="panel" id="sidePanel">
+    <div class="panel-toggle" id="panelToggle" onclick="togglePanel()">&#9650; Panel</div>
+    <div id="panelContent">
+      <h1>TETRIS</h1>
+      <div class="info-box"><label>Score</label><div class="value" id="score">0</div></div>
+      <div class="info-box"><label>Level</label><div class="value" id="level">1</div></div>
+      <div class="info-box"><label>Lines</label><div class="value" id="lines">0</div></div>
+      <div class="next-box"><label>Next</label><canvas id="nextCanvas" width="100" height="100"></canvas></div>
+      <div class="music-info">Now Playing<br><span id="themeName">-</span></div>
+      <div class="info-box" style="padding:6px 10px;">
+        <label style="display:block;margin-bottom:4px;">Theme</label>
+        <div class="theme-selector" id="themeSelector">
+          <div class="theme-btn" data-theme="A" onclick="selectTheme(this)">A</div>
+          <div class="theme-btn" data-theme="B" onclick="selectTheme(this)">B</div>
+          <div class="theme-btn" data-theme="C" onclick="selectTheme(this)">C</div>
+          <div class="theme-btn" data-theme="D" onclick="selectTheme(this)">D</div>
+          <div class="theme-btn" data-theme="E" onclick="selectTheme(this)">E</div>
+          <div class="theme-btn" data-theme="" onclick="selectTheme(this)">R</div>
+        </div>
       </div>
-    </div>
-    <button id="startBtn" onclick="startGame()">START</button>
-    <button id="pauseBtn" onclick="togglePause()" style="display:none;">PAUSE</button>
-    <div class="controls">
-      <span>&#8592;&#8594;</span> Move<br>
-      <span>&#8593;</span> Rotate<br>
-      <span>&#8595;</span> Soft Drop<br>
-      <span>Space</span> Hard Drop<br>
-      <span>P</span> Pause<br>
-      <span>M</span> Toggle Sound<br>
-      <span>T</span> Change Theme
+      <button id="startBtn" onclick="startGame()">START</button>
+      <button id="pauseBtn" onclick="togglePause()" style="display:none;">PAUSE</button>
+      <div class="controls"><span>&#8592;&#8594;</span> Move<br><span>&#8593;</span> Rotate<br><span>&#8595;</span> Soft Drop (double tap = hard drop)<br><span>P</span> Pause / <span>M</span> Sound / <span>T</span> Theme</div>
     </div>
   </div>
 </div>
@@ -809,15 +823,15 @@ function togglePause() {
   else { gameLoop=setInterval(tick,Math.max(100,800-(level-1)*70)); startBGM(); hideOverlay(); btn.textContent='PAUSE'; }
 }
 
-function toggleMobileControls() {
-  const panel = document.getElementById('mcPanel');
-  const toggle = document.getElementById('mcToggle');
-  if (panel.style.display === 'none') {
-    panel.style.display = 'flex';
-    toggle.innerHTML = '&#9660; Controls';
+function togglePanel() {
+  const content = document.getElementById('panelContent');
+  const toggle = document.getElementById('panelToggle');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.innerHTML = '&#9650; Panel';
   } else {
-    panel.style.display = 'none';
-    toggle.innerHTML = '&#9650; Controls';
+    content.style.display = 'none';
+    toggle.innerHTML = '&#9650; Panel';
   }
 }
 
