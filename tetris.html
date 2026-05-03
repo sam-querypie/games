@@ -195,23 +195,17 @@ async function resumeAudio() {
 
 function updateSoundUI() {
   const el = document.getElementById('soundStatus');
-  if (soundEnabled) {
-    el.innerHTML = '&#128266; ON'; el.className = 'on';
-  } else {
-    el.innerHTML = '&#128263; OFF'; el.className = 'off';
-  }
+  if (soundEnabled) { el.innerHTML = '&#128266; ON'; el.className = 'on'; }
+  else { el.innerHTML = '&#128263; OFF'; el.className = 'off'; }
 }
-
 function toggleSound() {
   soundEnabled = !soundEnabled;
   updateSoundUI();
 }
-
 function playSFX(fn) {
   if (!soundEnabled) return;
   resumeAudio().then(() => fn());
 }
-
 function tone(freq, duration, type, vol) {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -219,13 +213,11 @@ function tone(freq, duration, type, vol) {
   osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
   gain.gain.setValueAtTime(vol, audioCtx.currentTime);
   gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
 }
 
-// SFX Generators
+// SFX
 function sfxMove()   { tone(220, 0.05, 'square', 0.05); }
 function sfxRotate() { tone(440, 0.08, 'square', 0.06); }
 function sfxDrop()   { tone(150, 0.12, 'sawtooth', 0.08); }
@@ -249,12 +241,13 @@ const NF = {
   'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,
   'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.25,'F5':698.46,'F#5':739.99,
   'G5':783.99,'G#5':830.61,'A5':880.00,'A#5':932.33,'B5':987.77,'C6':1046.50,
-  'D5b':554.37,'E5b':622.25,'G5b':739.99,'A5b':830.61 // aliases for flats
+  'D5b':554.37,'E5b':622.25,'G5b':739.99,'A5b':830.61
 };
 
-// === BGM THEMES ===
+// === BGM THEMES A/B/C ===
 const THEMES = {
-  A: { name: 'Korobeiniki (Theme A)', leadType:'square', bassType:'triangle', leadVol:0.15, bassVol:0.12, tempo:240,
+  A: {
+    name: 'Korobeiniki', leadType:'square', bassType:'triangle', leadVol:0.15, bassVol:0.12, tempo:240,
     melody: [
       {n:'E5',d:.25},{n:'B4',d:.25},{n:'C5',d:.25},{n:'D5',d:.25},
       {n:'C5',d:.25},{n:'B4',d:.25},{n:'A4',d:.25},{n:'A4',d:.25},
@@ -273,7 +266,8 @@ const THEMES = {
       {n:'E3',d:1.0},{n:'A3',d:1.0},{n:'E3',d:1.0},{n:'B3',d:1.0}
     ]
   },
-  B: { name: 'Bradinsky (Theme B)', leadType:'sawtooth', bassType:'sawtooth', leadVol:0.10, bassVol:0.08, tempo:300,
+  B: {
+    name: 'Bradinsky', leadType:'sawtooth', bassType:'sawtooth', leadVol:0.10, bassVol:0.08, tempo:300,
     melody: [
       {n:'E4',d:.20},{n:'F#4',d:.20},{n:'G4',d:.20},{n:'A4',d:.20},{n:'B4',d:.20},
       {n:'C5',d:.20},{n:'B4',d:.20},{n:'A4',d:.20},{n:'G4',d:.20},{n:'F#4',d:.20},
@@ -291,7 +285,8 @@ const THEMES = {
       {n:'A2',d:.60},{n:'B2',d:.60}
     ]
   },
-  C: { name: 'Loginska (Theme C)', leadType:'sine', bassType:'triangle', leadVol:0.20, bassVol:0.10, tempo:200,
+  C: {
+    name: 'Loginska', leadType:'sine', bassType:'triangle', leadVol:0.20, bassVol:0.10, tempo:200,
     melody: [
       {n:'C5',d:.30},{n:'B4',d:.30},{n:'A4',d:.30},{n:'G4',d:.30},
       {n:'A4',d:.60},{n:0,d:.30},
@@ -320,28 +315,15 @@ let bgmBassNext = 0;
 let bgmTimerID = null;
 const LOOKAHEAD = 0.1;
 
-function scaleDuration(noteList, scaleFactor) {
-  return noteList.map(m => ({ n: m.n, d: m.d * scaleFactor }));
-}
+function tempoToBps(tempo) { return 60 / tempo; }
 
 function initTheme() {
   const keys = Object.keys(THEMES);
   const key = keys[Math.floor(Math.random() * keys.length)];
-  currentTheme = THEMES[key];
-  const bps = tempoToBps(currentTheme.tempo);
-  currentTheme = {
-    ...currentTheme,
-    smelody: scaleDuration(currentTheme.melody, bps),
-    sbass: scaleDuration(currentTheme.bass, bps)
-  };
+  const t = THEMES[key];
+  const bps = tempoToBps(t.tempo);
+  currentTheme = { ...t, smelody: t.melody.map(m => ({n: m.n, d: m.d * bps})), sbass: t.bass.map(m => ({n: m.n, d: m.d * bps})) };
   document.getElementById('themeName').textContent = currentTheme.name;
-}
-
-function tempoToBps(tempo) { // quarter-note duration in seconds
-  if (tempo === 240) return 0.25;
-  if (tempo === 300) return 0.20;
-  if (tempo === 200) return 0.30;
-  return 60 / tempo;
 }
 
 function scheduleTheme() {
@@ -355,10 +337,8 @@ function scheduleTheme() {
       const vol = soundEnabled ? currentTheme.leadVol : 0;
       gain.gain.setValueAtTime(vol, bgmMelodyNext);
       gain.gain.exponentialRampToValueAtTime(0.001, bgmMelodyNext + m.d * 0.95);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(bgmMelodyNext);
-      osc.stop(bgmMelodyNext + m.d);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(bgmMelodyNext); osc.stop(bgmMelodyNext + m.d);
     }
     if (m) { bgmMelodyNext += m.d; bgmMelodyIdx = (bgmMelodyIdx + 1) % currentTheme.smelody.length; }
   }
@@ -368,14 +348,12 @@ function scheduleTheme() {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = currentTheme.bassType;
-      osc.frequency.setValueAtTime(NF[b.n] || NF[b.n.replace('b','#')] || 130, bgmBassNext);
+      osc.frequency.setValueAtTime(NF[b.n] || 130, bgmBassNext);
       const vol = soundEnabled ? currentTheme.bassVol : 0;
       gain.gain.setValueAtTime(vol, bgmBassNext);
       gain.gain.exponentialRampToValueAtTime(0.001, bgmBassNext + b.d * 0.90);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(bgmBassNext);
-      osc.stop(bgmBassNext + b.d);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(bgmBassNext); osc.stop(bgmBassNext + b.d);
     }
     if (b) { bgmBassNext += b.d; bgmBassIdx = (bgmBassIdx + 1) % currentTheme.sbass.length; }
   }
@@ -383,13 +361,12 @@ function scheduleTheme() {
 }
 
 function startBGM() {
-  stopBGM(); // clear previous timer
+  stopBGM();
   if (!currentTheme) initTheme();
   bgmMelodyIdx = 0; bgmMelodyNext = audioCtx.currentTime + 0.05;
   bgmBassIdx = 0; bgmBassNext = audioCtx.currentTime + 0.05;
   scheduleTheme();
 }
-
 function stopBGM() {
   if (bgmTimerID) { clearTimeout(bgmTimerID); bgmTimerID = null; }
 }
@@ -432,31 +409,22 @@ function place() {
   piece.shape.forEach((row, dy) => row.forEach((cell, dx) => {
     if (cell) board[piece.y+dy][piece.x+dx] = cell;
   }));
-  playSFX(sfxLock);
-  clearLines();
-  piece = nextPiece;
-  nextPiece = randomPiece();
-  drawNext();
+  playSFX(sfxLock); clearLines();
+  piece = nextPiece; nextPiece = randomPiece(); drawNext();
   if (!valid(piece)) endGame();
 }
 function clearLines() {
   let cleared = 0;
   for (let r = ROWS - 1; r >= 0; r--) {
-    if (board[r].every(c => c)) {
-      board.splice(r, 1);
-      board.unshift(Array(COLS).fill(0));
-      cleared++; r++;
-    }
+    if (board[r].every(c => c)) { board.splice(r, 1); board.unshift(Array(COLS).fill(0)); cleared++; r++; }
   }
   if (cleared) {
     playSFX(() => sfxClear(cleared));
     const prevLevel = level;
     score += ([0,100,300,500,800][cleared] || 800) * level;
-    lines += cleared;
-    level = Math.floor(lines / 10) + 1;
+    lines += cleared; level = Math.floor(lines / 10) + 1;
     if (level > prevLevel) playSFX(sfxLevelUp);
-    updateUI();
-    clearInterval(gameLoop);
+    updateUI(); clearInterval(gameLoop);
     gameLoop = setInterval(tick, Math.max(100, 800 - (level - 1) * 70));
   }
 }
@@ -519,7 +487,7 @@ function startGame() {
   updateUI(); drawNext(); hideOverlay();
   document.getElementById('startBtn').textContent = 'RESTART';
   document.getElementById('pauseBtn').style.display = 'block';
-  initTheme(); // pick random theme
+  initTheme();
   resumeAudio().then(() => startBGM());
 }
 function endGame() {
