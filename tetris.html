@@ -310,19 +310,19 @@
           onmousedown="event.preventDefault(); holdStart('left')"
           onmouseup="event.preventDefault(); holdStop('left')"
           onmouseleave="event.preventDefault(); holdStop('left')">⬅️</div>
-        <div class="touch-btn" id="btnRight"
-          ontouchstart="event.preventDefault(); holdStart('right')"
-          ontouchend="event.preventDefault(); holdStop('right')"
-          onmousedown="event.preventDefault(); holdStart('right')"
-          onmouseup="event.preventDefault(); holdStop('right')"
-          onmouseleave="event.preventDefault(); holdStop('right')">➡️</div>
-        <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
         <div class="touch-btn" id="btnDown"
           ontouchstart="handleDownTouch(event)"
           ontouchend="handleDownRelease(event)"
           onmousedown="mobileDropDown()"
           onmouseup="mcDownFirstTap=0;"
           onmouseleave="mcDownFirstTap=0;">⬇️</div>
+        <div class="touch-btn" id="btnRotate" ontouchstart="rotateBlock()">🔄</div>
+        <div class="touch-btn" id="btnRight"
+          ontouchstart="event.preventDefault(); holdStart('right')"
+          ontouchend="event.preventDefault(); holdStop('right')"
+          onmousedown="event.preventDefault(); holdStart('right')"
+          onmouseup="event.preventDefault(); holdStop('right')"
+          onmouseleave="event.preventDefault(); holdStop('right')">➡️</div>
       </div>
     </div>
   </div>
