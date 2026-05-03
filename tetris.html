@@ -306,6 +306,61 @@ const THEMES = {
       {n:'C3',d:1.2},{n:'A2',d:1.2},
       {n:'F2',d:1.2},{n:'G2',d:1.2}
     ]
+  },
+  D: {
+    name: 'Korobeiniki (Piano)', leadType:'sine', bassType:'triangle', leadVol:0.15, bassVol:0.10, tempo:145,
+    attack: 0.01, sustain: 0.5, release: 0.4,
+    melody: [
+      // m1: | (A4+D5) B4 C5 D5 C5 B4 |
+      {n:['A4','D5'],d:.25},{n:'B4',d:.125},{n:'C5',d:.125},{n:'D5',d:.25},{n:'C5',d:.125},{n:'B4',d:.125},
+      // m2: | (E4+A4) A4 C5 E5 D5 C5 |
+      {n:['E4','A4'],d:.25},{n:'A4',d:.125},{n:'C5',d:.125},{n:'E5',d:.25},{n:'D5',d:.125},{n:'C5',d:.125},
+      // m3: | (G4+B4)q. C5/8 | D5 E5 |
+      {n:['G4','B4'],d:.375},{n:'C5',d:.125},{n:'D5',d:.25},{n:'E5',d:.25},
+      // m4: | (A4+C5) A4 A4 r |
+      {n:['A4','C5'],d:.25},{n:'A4',d:.25},{n:'A4',d:.25},{n:0,d:.25},
+      // m5: | (D4+A4)q D5/8 E5/8 F5 G5 F5 E5 D5 |
+      {n:['D4','A4'],d:.25},{n:'D5',d:.125},{n:'E5',d:.125},{n:'F5',d:.125},{n:'G5',d:.125},{n:'F5',d:.125},{n:'E5',d:.125},{n:'D5',d:.125},{n:'A4',d:.125},
+      // m6: | (D4+A4) D5 F5 E5 D5 C5 E5 D5 C5 |
+      {n:['D4','A4'],d:.25},{n:'D5',d:.125},{n:'F5',d:.125},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},
+      // m7: | (D4+A4) D5 E5 F5 E5 D5 C5 B4 |
+      {n:['D4','A4'],d:.25},{n:'D5',d:.125},{n:'E5',d:.125},{n:'F5',d:.125},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},{n:'A4',d:.125},
+      // m8: | (E4+B4) (E4+B4) E5 D5 C5 B4 |
+      {n:['E4','B4'],d:.25},{n:['E4','B4'],d:.25},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},
+      // m9: | (E4+B4) (E4+B4) E5 D5 C5 B4 |
+      {n:['E4','B4'],d:.25},{n:['E4','B4'],d:.25},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},
+      // m10: | (E4+C5) (E4+C5) E5 D5 C5 B4 |
+      {n:['E4','C5'],d:.25},{n:['E4','C5'],d:.25},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},
+      // m11: | (D4+A4) (D4+A4) D5 C5 B4 A4 |
+      {n:['D4','A4'],d:.25},{n:['D4','A4'],d:.25},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},{n:'A4',d:.125},
+      // m12-13 repeat m1-2
+      {n:['A4','D5'],d:.25},{n:'B4',d:.125},{n:'C5',d:.125},{n:'D5',d:.25},{n:'C5',d:.125},{n:'B4',d:.125},
+      {n:['E4','A4'],d:.25},{n:'A4',d:.125},{n:'C5',d:.125},{n:'E5',d:.25},{n:'D5',d:.125},{n:'C5',d:.125},
+      // m14: codetta (E4+B4) E5 D5 C5 B4 A4 G#4 |
+      {n:['E4','B4'],d:.25},{n:'E5',d:.125},{n:'D5',d:.125},{n:'C5',d:.125},{n:'B4',d:.125},{n:'A4',d:.125},{n:'G#4',d:.125},
+      // m15: | (A4+C5+E5) (A4+C5) (A4) z |
+      {n:['A4','C5','E5'],d:.5},{n:['A4','C5'],d:.25},{n:'A4',d:.25}
+    ],
+    bass: [
+      // bass line returns after 1 bar delay (simple walk)
+      {n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'G2',d:.5},{n:'G2',d:.5},{n:'G2',d:.5},{n:'G2',d:.5},
+      {n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},
+      {n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},
+      {n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},
+      {n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},{n:'D2',d:.5},
+      {n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},{n:'A2',d:.5},
+      {n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},{n:'E2',d:.5},
+      {n:'A2',d:.25},{n:0,d:.25}
+    ]
   }
 };
 
@@ -331,17 +386,26 @@ function initTheme() {
 function scheduleTheme() {
   while (bgmMelodyNext < audioCtx.currentTime + LOOKAHEAD + 0.5) {
     const m = currentTheme.smelody[bgmMelodyIdx];
-    if (m && m.n) {
+    // support polyphony: m.n can be a single note string or an array of strings
+    const notes = (m && m.n) ? (Array.isArray(m.n) ? m.n : [m.n]) : [];
+    const isChord = notes.length > 1;
+    const volBase = soundEnabled ? currentTheme.leadVol : 0;
+    notes.forEach(note => {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = currentTheme.leadType;
-      osc.frequency.setValueAtTime(NF[m.n] || 440, bgmMelodyNext);
-      const vol = soundEnabled ? currentTheme.leadVol : 0;
-      gain.gain.setValueAtTime(vol, bgmMelodyNext);
-      gain.gain.exponentialRampToValueAtTime(0.001, bgmMelodyNext + m.d * 0.95);
+      osc.frequency.setValueAtTime(NF[note] || 440, bgmMelodyNext);
+      // piano-style envelope: quick attack, sustain, release
+      const a = currentTheme.attack || 0.01;
+      const s = currentTheme.sustain !== undefined ? currentTheme.sustain : (isChord ? 0.7 : 0.4);
+      const r = currentTheme.release || 0.3;
+      gain.gain.setValueAtTime(0, bgmMelodyNext);
+      gain.gain.linearRampToValueAtTime(volBase, bgmMelodyNext + a);
+      gain.gain.setValueAtTime(volBase * s, bgmMelodyNext + a + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, bgmMelodyNext + m.d + r);
       osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(bgmMelodyNext); osc.stop(bgmMelodyNext + m.d);
-    }
+      osc.start(bgmMelodyNext); osc.stop(bgmMelodyNext + m.d + r);
+    });
     if (m) { bgmMelodyNext += m.d; bgmMelodyIdx = (bgmMelodyIdx + 1) % currentTheme.smelody.length; }
   }
   while (bgmBassNext < audioCtx.currentTime + LOOKAHEAD + 0.5) {
@@ -352,10 +416,12 @@ function scheduleTheme() {
       osc.type = currentTheme.bassType;
       osc.frequency.setValueAtTime(NF[b.n] || 130, bgmBassNext);
       const vol = soundEnabled ? currentTheme.bassVol : 0;
-      gain.gain.setValueAtTime(vol, bgmBassNext);
-      gain.gain.exponentialRampToValueAtTime(0.001, bgmBassNext + b.d * 0.90);
+      gain.gain.setValueAtTime(0, bgmBassNext);
+      gain.gain.linearRampToValueAtTime(vol, bgmBassNext + 0.02);
+      gain.gain.setValueAtTime(vol * 0.8, bgmBassNext + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, bgmBassNext + b.d + 0.2);
       osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(bgmBassNext); osc.stop(bgmBassNext + b.d);
+      osc.start(bgmBassNext); osc.stop(bgmBassNext + b.d + 0.2);
     }
     if (b) { bgmBassNext += b.d; bgmBassIdx = (bgmBassIdx + 1) % currentTheme.sbass.length; }
   }
