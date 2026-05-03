@@ -185,6 +185,23 @@
       padding: 12px;
       margin-top: 12px;
     }
+    .mc-toggle {
+      display: none;
+      width: 100%;
+      padding: 8px 0;
+      background: rgba(15,15,35,0.9);
+      border: 1px solid #0f3460;
+      border-radius: 4px;
+      color: #00d4ff;
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      margin-bottom: 8px;
+      touch-action: manipulation;
+    }
+    .mc-toggle:active { background: rgba(0,212,255,0.2); }
     .control-row {
       display: flex;
       gap: 8px;
@@ -230,6 +247,9 @@
       .mobile-controls {
         display: flex;
         flex-direction: column;
+      }
+      .mc-toggle {
+        display: block;
       }
       .panel {
         width: 100%;
