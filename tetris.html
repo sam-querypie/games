@@ -422,7 +422,7 @@ const NF = {
 // === BGM THEMES A/B/C ===
 const THEMES = {
   A: {
-    name: 'Korobeiniki', leadType:'square', bassType:'triangle', leadVol:0.15, bassVol:0.12, tempo:60,
+    name: 'Korobeiniki', leadType:'square', bassType:'triangle', leadVol:0.15, bassVol:0.12, tempo:60, gridColor:'#0f0f23',
     melody: [
       {n:'E5',d:.25},{n:'B4',d:.25},{n:'C5',d:.25},{n:'D5',d:.25},
       {n:'C5',d:.25},{n:'B4',d:.25},{n:'A4',d:.25},{n:'A4',d:.25},
@@ -442,7 +442,7 @@ const THEMES = {
     ]
   },
   B: {
-    name: 'Bradinsky (GB B-Type)', leadType:'square', bassType:'square', leadVol:0.12, bassVol:0.08, tempo:40,
+    name: 'Bradinsky (GB B-Type)', leadType:'square', bassType:'square', leadVol:0.12, bassVol:0.08, tempo:40, gridColor:'#0f2310',
     melody: [
       // bar 1
       {n:'E4',d:.125},{n:'E4',d:.125},{n:'F#4',d:.125},{n:'G4',d:.125},{n:'A4',d:.125},{n:'G4',d:.125},{n:'F#4',d:.125},{n:'E4',d:.125},
@@ -463,7 +463,7 @@ const THEMES = {
     ]
   },
   C: {
-    name: 'Loginska', leadType:'sine', bassType:'triangle', leadVol:0.20, bassVol:0.10, tempo:60,
+    name: 'Loginska', leadType:'sine', bassType:'triangle', leadVol:0.20, bassVol:0.10, tempo:60, gridColor:'#0f1823',
     melody: [
       {n:'C5',d:.30},{n:'B4',d:.30},{n:'A4',d:.30},{n:'G4',d:.30},
       {n:'A4',d:.60},{n:0,d:.30},
@@ -483,7 +483,7 @@ const THEMES = {
     ]
   },
   D: {
-    name: 'Korobeiniki (Piano)', leadType:'sine', bassType:'triangle', leadVol:0.15, bassVol:0.10, tempo:40,
+    name: 'Korobeiniki (Piano)', leadType:'sine', bassType:'triangle', leadVol:0.15, bassVol:0.10, tempo:40, gridColor:'#1a0f23',
     attack: 0.01, sustain: 0.5, release: 0.4,
     melody: [
       // m1: | (A4+D5) B4 C5 D5 C5 B4 |
@@ -538,7 +538,7 @@ const THEMES = {
     ]
   },
   E: {
-    name: 'Bradinsky (Arcade E min)', leadType:'square', bassType:'square', leadVol:0.14, bassVol:0.10, tempo:30,
+    name: 'Bradinsky (Arcade E min)', leadType:'square', bassType:'square', leadVol:0.14, bassVol:0.10, tempo:30, gridColor:'#230f0f',
     melody: [
       // Section A - bar 1
       {n:['B3','B4'],d:.125},{n:'B5',d:.125},{n:'B4',d:.125},{n:'C6',d:.125},
@@ -757,6 +757,13 @@ function clearLines() {
       playSFX(sfxLevelUp);
       // BGM tempo increases with level
       applyGameTempo(level);
+      // Auto-cycle theme if not manually selected
+      if (selectedThemeKey === null) {
+        const keys = Object.keys(THEMES);
+        const nextThemeKey = keys[(level - 1) % keys.length];
+        initTheme(nextThemeKey);
+        startBGM();
+      }
     }
     updateUI(); clearInterval(gameLoop);
     gameLoop = setInterval(tick, Math.max(100, 800 - (level - 1) * 70));
@@ -786,7 +793,7 @@ function drawGhost() {
   }));
 }
 function draw() {
-  ctx.fillStyle = '#0f0f23'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = currentTheme?.gridColor || '#0f0f23'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = 'rgba(255,255,255,0.03)';
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) ctx.strokeRect(c*BLOCK, r*BLOCK, BLOCK, BLOCK);
   board.forEach((row,r) => row.forEach((cell,c) => { if (cell) drawBlock(ctx, c, r, COLORS[cell]); }));
@@ -794,7 +801,7 @@ function draw() {
   piece.shape.forEach((row,dy) => row.forEach((cell,dx) => { if (cell) drawBlock(ctx, piece.x+dx, piece.y+dy, COLORS[cell]); }));
 }
 function drawNext() {
-  nCtx.fillStyle = '#0f0f23'; nCtx.fillRect(0,0,100,100);
+  nCtx.fillStyle = currentTheme?.gridColor || '#0f0f23'; nCtx.fillRect(0,0,100,100);
   const s=20, shape=nextPiece.shape, ox=Math.floor((5-shape[0].length)/2), oy=Math.floor((5-shape.length)/2);
   shape.forEach((row,dy) => row.forEach((cell,dx) => {
     if (cell) { nCtx.fillStyle=COLORS[cell]; nCtx.fillRect((ox+dx)*s+1,(oy+dy)*s+1,s-2,s-2); nCtx.fillStyle='rgba(255,255,255,0.15)'; nCtx.fillRect((ox+dx)*s+1,(oy+dy)*s+1,s-2,4); }
@@ -953,7 +960,7 @@ document.addEventListener('keydown', e => {
   draw();
 });
 
-ctx.fillStyle = '#0f0f23'; ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle = currentTheme?.gridColor || '#0f0f23'; ctx.fillRect(0,0,canvas.width,canvas.height);
 showOverlay('TETRIS', 'Press START to play');
 </script>
 </body>
